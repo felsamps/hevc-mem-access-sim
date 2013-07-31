@@ -11,3 +11,13 @@
 *.lai
 *.la
 *.a
+
+# Other files
+nbproject/
+hevc_sim
+
+
+# Input/Test files
+*.txt
+*.mat
+*.dat
