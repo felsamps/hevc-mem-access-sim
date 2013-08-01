@@ -93,6 +93,15 @@ void MemoryHandler::xAccessMemory(LCUData* lcu, UInt idTile, UInt xLCU, UInt yLC
 					this->acc.clear();
 				}
 				break;
+			case 'R':
+				for (x = e->xLeft; x < e->xRight; x+=RASTER_STEP) {
+					for (y = e->yTop; y < e->yBottom; y+=RASTER_STEP) {
+						xAccessBlock(x, y, TARGET_CU_SIZE);
+						xUpdateMemory(idTile);
+						this->acc.clear();
+					}
+				}
+
 		}
 	}
 }

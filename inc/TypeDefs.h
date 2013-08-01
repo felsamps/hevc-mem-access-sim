@@ -9,5 +9,7 @@ typedef long long int LLInt;
 #define TARGET_CU_SIZE 16
 #define TARGET_PU_SIZE 0 //2Nx2N
 
+#define RASTER_STEP 5
+
 #endif	/* TYPEDEFS_H */
 
