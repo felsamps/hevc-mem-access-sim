@@ -13,6 +13,16 @@ void LCUData::insert(Entry* e) {
 	this->accList.push_back(e);
 }
 
+Entry* LCUData::pop() {
+	Entry* returnable = this->accList.front();
+	this->accList.pop_front();
+	return returnable;
+}
+
+bool LCUData::empty() {
+	return this->accList.empty();
+}
+
 void LCUData::printEntries() {
 	cout << this->accList.size() << endl;
 	/*for(list<Entry*>::iterator it = this->accList.begin(); it != this->accList.end(); it++) {

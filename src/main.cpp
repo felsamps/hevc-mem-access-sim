@@ -4,6 +4,7 @@
 
 #include "../inc/TypeDefs.h"
 #include "../inc/TraceHandler.h"
+#include "../inc/MemoryHandler.h"
 
 using namespace std;
 
@@ -20,8 +21,11 @@ int main(int argc, char** argv) {
 	TraceHandler* th = new TraceHandler(numOfTiles, wFrame, hFrame, traceFileName);
 	th->parse(idFrame, idRefFrame);
 	
-	th->getLCUData(0, 0, 0)->printEntries();
+	MemoryHandler* mh = new MemoryHandler(numOfTiles, wFrame, hFrame);
+	mh->generateAccessMap(th);
 
+	mh->reportAccessMap();
+	
 	return 0;
 }
 

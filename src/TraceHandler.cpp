@@ -1,8 +1,8 @@
 #include "../inc/TraceHandler.h"
 
 TraceHandler::TraceHandler(UInt numOfTiles, UInt wFrame, UInt hFrame, string traceFileName) {
-	UInt wInLCU = (wFrame / 64) + 1;
-	UInt hInLCU = (hFrame / 64) + 1;
+	UInt wInLCU = (wFrame % TARGET_CU_SIZE == 0) ? wFrame / TARGET_CU_SIZE : wFrame / TARGET_CU_SIZE + 1;
+	UInt hInLCU = (hFrame % TARGET_CU_SIZE == 0) ? hFrame / TARGET_CU_SIZE : hFrame / TARGET_CU_SIZE + 1;
 	
 	this->traceFileName = traceFileName;
 	
@@ -56,9 +56,9 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				fp >> xFS >> yFS;
 				newEntry = new Entry();
 				newEntry->opcode = opcode;
-				newEntry->xFS = xFS;
-				newEntry->yFS = yFS;
-				if(sizePart == 0) { //ONLY 2Nx2N
+				newEntry->xFS = xCU + xFS;
+				newEntry->yFS = yCU + yFS;
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
 					newLCU->insert(newEntry);
 				}
 				break;
@@ -67,9 +67,9 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				fp >> xCand >> yCand;
 				newEntry = new Entry();
 				newEntry->opcode = opcode;
-				newEntry->xCand = xCand;
-				newEntry->yCand = yCand;
-				if(sizePart == 0) { //ONLY 2Nx2N
+				newEntry->xCand = xCU + xCand;
+				newEntry->yCand = yCU + yCand;
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
 					newLCU->insert(newEntry);
 				}
 				break;
@@ -78,11 +78,11 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				fp >> xLeft >> xRight >> yTop >> yBottom;
 				newEntry = new Entry();
 				newEntry->opcode = opcode;
-				newEntry->xLeft = xLeft;
-				newEntry->xRight = xRight;
-				newEntry->yTop = yTop;
-				newEntry->yBottom = yBottom;
-				if(sizePart == 0) { //ONLY 2Nx2N
+				newEntry->xLeft = xCU + xLeft;
+				newEntry->xRight = xCU + xRight;
+				newEntry->yTop = yCU + yTop;
+				newEntry->yBottom = yCU + yBottom;
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
 					newLCU->insert(newEntry);
 				}
 				break;
@@ -90,9 +90,8 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 			case 'E': /*End of LCU*/
 				if(idFrame == currIdFrame and idRefFrame == currIdRefFrame) {
 					//TODO fix it!!
-					if(idDepth == 3) {
-						this->videoData[currIdTile][xLCU/64][yLCU/64] = newLCU;
-					}
+					this->videoData[currIdTile][xLCU/TARGET_CU_SIZE][yLCU/TARGET_CU_SIZE] = newLCU;
+					
 				}
 				break;
 		}

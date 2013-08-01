@@ -22,7 +22,9 @@ private:
 public:
    LCUData(UInt xLCU, UInt yLCU, UInt idTile, UInt idFrame);
    
-   void insert(Entry* e);   
+   void insert(Entry* e);
+   Entry* pop();
+   bool empty();
 
    void printEntries();
 };
