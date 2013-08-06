@@ -1,3 +1,5 @@
+#include <set>
+
 #include "../inc/TraceHandler.h"
 
 TraceHandler::TraceHandler(UInt numOfTiles, UInt wFrame, UInt hFrame, string traceFileName) {
@@ -32,6 +34,8 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 	
 	LCUData* newLCU;
 	Entry* newEntry;
+	set<UInt> refs;
+	
 	
 	/*look for LCU memory accesses regarding the idFrame and ifRefFrame*/
 	while(!fp.eof()) {		
@@ -42,6 +46,8 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 			case 'L': /*LCU entry*/
 				fp >> xLCU >> yLCU >> currIdTile >> currIdFrame;
 				newLCU = new LCUData(xLCU, yLCU, currIdTile, currIdFrame);
+				refs.clear();
+				
 				break;
 				
 			case 'U': /*CU entry*/
@@ -50,6 +56,7 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				
 			case 'P': /*PU entry*/
 				fp >> idPart >> sizePart >> currIdRefFrame;
+				refs.insert(currIdRefFrame);
 				break;
 				
 			case 'F': /*TZ First Search*/
@@ -58,7 +65,7 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				newEntry->opcode = opcode;
 				newEntry->xFS = xCU + xFS;
 				newEntry->yFS = yCU + yFS;
-				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH and idRefFrame == currIdRefFrame) {
 					newLCU->insert(newEntry);
 				}
 				break;
@@ -69,7 +76,7 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				newEntry->opcode = opcode;
 				newEntry->xCand = xCU + xCand;
 				newEntry->yCand = yCU + yCand;
-				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH and idRefFrame == currIdRefFrame) {
 					newLCU->insert(newEntry);
 				}
 				break;
@@ -82,13 +89,13 @@ void TraceHandler::parse(UInt idFrame, UInt idRefFrame) {
 				newEntry->xRight = xCU + xRight;
 				newEntry->yTop = yCU + yTop;
 				newEntry->yBottom = yCU + yBottom;
-				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH) {
+				if(sizePart == TARGET_PU_SIZE and idDepth == TARGET_DEPTH and idRefFrame == currIdRefFrame) {
 					newLCU->insert(newEntry);
 				}
 				break;
 				
 			case 'E': /*End of LCU*/
-				if(idFrame == currIdFrame and idRefFrame == currIdRefFrame) {
+				if(idFrame == currIdFrame and refs.find(idRefFrame) != refs.end()) {
 					//TODO fix it!!
 					this->videoData[currIdTile][xLCU/TARGET_CU_SIZE][yLCU/TARGET_CU_SIZE] = newLCU;
 					
